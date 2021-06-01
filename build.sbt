@@ -1,5 +1,5 @@
 
-import sbt._
+import sbt.{ThisBuild, _}
 import sbt.Keys.{watchSources, _}
 
 ThisBuild / version := "0.0.16"
@@ -41,14 +41,16 @@ def ossDependencies : Seq[ModuleID] = {
 }
 
 lazy val sensorData =  (project in file("."))
-  .enablePlugins(CloudflowApplicationPlugin, CloudflowAkkaPlugin, ScalafmtPlugin)
+  .enablePlugins(CloudflowApplicationPlugin, CloudflowAkkaPlugin)
   .enablePlugins(CloudflowLibraryPlugin)
   .enablePlugins(Cinnamon)
   .settings(
-    scalaVersion := "2.12.11",
+    scalaVersion := "2.12.12",
+
+    schemaCodeGenerator := SchemaCodeGenerator.Java,
+
     runLocalConfigFile := Some("src/main/resources/local.conf"),
-    scalafmtOnCompile := true,
-    name := "sensor-data-scala-proto-grpc",
+    name := "sensor-data-java-proto-grpc",
 
     // Add the Cinnamon Agent settings for run and test
     cinnamonSuppressRepoWarnings := true,
@@ -64,10 +66,7 @@ lazy val sensorData =  (project in file("."))
         ossDependencies
       }
     },
-    organization := "com.lightbend.cloudflow",
-    headerLicense := Some(HeaderLicense.ALv2("(C) 2016-2021", "Lightbend Inc. <https://www.lightbend.com>")),
-
-    crossScalaVersions := Vector(scalaVersion.value),
+    javacOptions += "-Xlint:deprecation",
     scalacOptions ++= Seq(
       "-encoding", "UTF-8",
       "-target:jvm-1.8",
@@ -80,10 +79,8 @@ lazy val sensorData =  (project in file("."))
       "-language:_",
       "-unchecked"
     ),
-
-
-    Compile / console / scalacOptions --= Seq("-Ywarn-unused", "-Ywarn-unused-import"),
-    Test / console / scalacOptions := (Compile / console / scalacOptions).value
+    organization := "com.lightbend.cloudflow",
+    headerLicense := Some(HeaderLicense.ALv2("(C) 2016-2021", "Lightbend Inc. <https://www.lightbend.com>")),
 
   )
 

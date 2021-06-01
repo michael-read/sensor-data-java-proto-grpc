@@ -19,18 +19,6 @@ class GRPCSimulation extends Simulation {
   val timestamps = Iterator.continually(
     Map("timestamp" -> Instant.now().getEpochSecond)
   )
-/*
-  val measurementPayload: Expression[Measurements] = Measurements.defaultInstance.updateExpr(
-    _.power :~ $("power"),
-    _.rotorSpeed :~ $("rotorSpeed"),
-    _.windSpeed :~ $("windSpeed")
-  )
-
-  val sensorPayload: Expression[SensorData] = SensorData.defaultInstance.updateExpr(
-    _.deviceId :~ $("deviceid"),
-    _.timestamp :~ $("timestamp"),
-    _.measurements :~ measurementPayload
-  )*/
 
   val grpcConf = grpc(managedChannelBuilder("localhost", 8080).usePlaintext())
 
@@ -52,8 +40,6 @@ class GRPCSimulation extends Simulation {
         )
     )
 
-//    .pause(7.seconds)
-
   setUp(
     // scn.inject(atOnceUsers(1000))
     //    scn.inject(atOnceUsers(1))
@@ -62,12 +48,12 @@ class GRPCSimulation extends Simulation {
     // simulation set up -> https://gatling.io/docs/current/general/simulation_setup/
         scn.inject(
           nothingFor(4 seconds), // 1
-/*          atOnceUsers(10), // 2
+          atOnceUsers(10), // 2
           rampUsers(10) during (5 seconds), // 3
           constantUsersPerSec(20) during (15 seconds), // 4
           constantUsersPerSec(20) during (15 seconds) randomized, // 5
           rampUsersPerSec(100) to 20 during (10 minutes), // 6
-          rampUsersPerSec(100) to 20 during (10 minutes) randomized, // 7*/
+          rampUsersPerSec(100) to 20 during (10 minutes) randomized, // 7
           heavisideUsers(2000) during (20 seconds), // 8
           heavisideUsers(4000) during (40 seconds), // 8
           heavisideUsers(10000) during (30 seconds) // 8

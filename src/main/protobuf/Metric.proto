@@ -1,5 +1,6 @@
 syntax = "proto3";
 option java_package = "sensordata";
+option java_outer_classname = "MetricProto";
 
 message Metric {
     string deviceId = 1;
