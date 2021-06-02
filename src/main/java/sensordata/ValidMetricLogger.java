@@ -55,7 +55,7 @@ public class ValidMetricLogger extends AkkaStreamlet {
         return StreamletShape.createWithInlets(inlet);
     }
 
-    private final String mPrefix = msgPrefix.getValue(context());
+    private String mPrefix() { return msgPrefix.getValue(context()); }
 
     private void logF(String msg) {
         if (logLevel.getValue(context()).equalsIgnoreCase("debug")) {
@@ -73,7 +73,7 @@ public class ValidMetricLogger extends AkkaStreamlet {
     }
 
     private void log(Metric metric) {
-        logF(String.format("%s = %s", mPrefix, metric.toString()));
+        logF(String.format("%s = %s", mPrefix(), metric.toString()));
     }
 
 
