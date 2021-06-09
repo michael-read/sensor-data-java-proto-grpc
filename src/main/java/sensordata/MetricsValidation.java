@@ -15,6 +15,7 @@ import cloudflow.streamlets.StreamletShape;
 import cloudflow.streamlets.proto.javadsl.ProtoInlet;
 import cloudflow.streamlets.proto.javadsl.ProtoOutlet;
 
+import com.lightbend.cinnamon.akka.stream.CinnamonAttributes;
 import sensordata.MetricProto.Metric;
 import sensordata.InvalidProto.InvalidMetric;
 
@@ -27,6 +28,7 @@ public class MetricsValidation extends AkkaStreamlet {
             true,
             (inBytes, throwable) -> null
     );
+
     public final ProtoOutlet<InvalidMetric> invalid =
             new ProtoOutlet<>("invalid",
                     (invalidMetric) -> {
@@ -50,22 +52,28 @@ public class MetricsValidation extends AkkaStreamlet {
 
     @Override
     public AkkaStreamletLogic createLogic() {
-        return new RunnableGraphStreamletLogic(getContext()) {
+        return new RunnableGraphStreamletLogic(context()) {
 
             FlowWithContext<Metric, Committable, Either<InvalidMetric, Metric>, Committable, NotUsed> createFlow() {
                 return FlowWithContext.<Metric, Committable>create()
                         .map(metric -> {
-                            if (metric.getValue() < 0) return Either.left(InvalidMetric.newBuilder()
-                                    .setMetric(metric)
-                                    .setError("All metric must be positive numbers!")
-                                    .build()
-                            );
-                            else return Either.right(metric);
+                            if (metric.getValue() < 0) {
+//                                system().log().warning(String.format("%s %s = %f All metrics must be positive numbers", metric.getDeviceId(), metric.getName(), metric.getValue()));
+                                return Either.left(InvalidMetric.newBuilder()
+                                        .setMetric(metric)
+                                        .setError("All metrics must be positive numbers!")
+                                        .build()
+                                );
+                            }
+                            else {
+                                return Either.right(metric);
+                            }
                         });
+//                        .withAttributes(CinnamonAttributes.instrumented("MetricsValidation"));
             }
 
             public RunnableGraph createRunnableGraph() {
-                return getSourceWithCommittableContext(inlet).to(Splitter.sink(createFlow(), invalid, valid, getContext()));
+                return getSourceWithCommittableContext(inlet).to(Splitter.sink(createFlow(), invalid, valid, context()));
             }
         };
     }

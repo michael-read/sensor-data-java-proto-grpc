@@ -34,7 +34,7 @@ public class InvalidMetricLogger extends AkkaStreamlet {
             FlowWithContext<InvalidMetric, ConsumerMessage.Committable, InvalidMetric, ConsumerMessage.Committable, NotUsed> createFlow() {
                 return FlowWithContext.<InvalidMetric, ConsumerMessage.Committable>create()
                         .map(invalidMetric -> {
-                            context().system().log().warning(String.format("%s = %s", "Invalid metric detected!!!", invalidMetric.toString()));
+                            system().log().warning(String.format("%s = %s", "Invalid metric detected!!!", invalidMetric.toString()));
                             return invalidMetric;
                         });
             }
