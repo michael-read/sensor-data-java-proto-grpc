@@ -202,6 +202,12 @@
                                     <assembly>
                                         <descriptorRef>artifact</descriptorRef>
                                         <targetDir>/opt/cloudflow</targetDir>
+                                        <user>185</user>
+                                    </assembly>
+
+                                    <assembly>
+                                        <name>lightbend-telemetry-agent</name>
+                                        <targetDir>/opt/cloudflow</targetDir>
                                         <inline>
                                             <files>
                                                 <file>
