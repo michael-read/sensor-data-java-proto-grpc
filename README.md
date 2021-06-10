@@ -1,6 +1,10 @@
 ![Akka Data Pipelines](adp.png)
 # Akka Data Pipelines - Streaming Data Pipelines Simplified - Introduction
 
+## Commercial Lightbend Credentials for pom.xml
+export LIGHTBEND_COMMERCIAL_URL="https://repo.lightbend.com/pass/<your-password>/commercial-releases"
+mvn clean package cloudflow:extract-streamlets
+
 ## Streaming Data Is More Interesting Than Data At Rest
 
 Building streaming pipelines to move data from one source to another—so it can be stored, used for analytics, or combined with other data—can get to be quite complicated. We've made developing streaming applications a lot simpler with Akka Data Pipelines, so that you can be more productive when you're use cases include the following examples:

@@ -19,6 +19,81 @@
         <cinnamon.version>2.15.1</cinnamon.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.lightbend.cloudflow</groupId>
+            <artifactId>cloudflow-akka_${scala.bin.version}</artifactId>
+            <version>${cloudflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cloudflow</groupId>
+            <artifactId>cloudflow-akka-util_${scala.bin.version}</artifactId>
+            <version>${cloudflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cloudflow</groupId>
+            <artifactId>cloudflow-runner_${scala.bin.version}</artifactId>
+            <version>${cloudflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cloudflow</groupId>
+            <artifactId>cloudflow-localrunner_${scala.bin.version}</artifactId>
+            <version>${cloudflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.16</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.16</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.32.1</version>
+        </dependency>
+        <!-- Add Lightbend Telemetry (Cinnamon) dependencies -->
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-agent</artifactId>
+            <version>${cinnamon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-akka_${scala.bin.version}</artifactId>
+            <version>${cinnamon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-akka-stream_${scala.bin.version}</artifactId>
+            <version>${cinnamon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-akka-http_${scala.bin.version}</artifactId>
+            <version>${cinnamon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-prometheus</artifactId>
+            <version>${cinnamon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-prometheus-httpserver</artifactId>
+            <version>${cinnamon.version}</version>
+        </dependency>
+
+    </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -83,95 +158,116 @@
                                     <artifactId>cinnamon-agent</artifactId>
                                     <version>${cinnamon.version}</version>
                                     <overWrite>true</overWrite>
-                                    <destFileName>cinnamon-agent.jar</destFileName>
+                                    <destFileName>cinnamon-agent-${cinnamon.version}.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            <!-- Use agent when running the application -->
+            <!-- docker image creation -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker.maven.plugin.version}</version>
                 <configuration>
-                    <executable>java</executable>
-                    <arguments>
-                        <!-- Use Cinnamon agent when running the application -->
-                        <argument>-javaagent:${project.build.directory}/dependency/cinnamon-agent.jar</argument>
-                        <argument>-classpath</argument>
-                        <classpath />
-                        <argument>sensordata</argument>
-                    </arguments>
+                    <images>
+                        <image>
+                            <name>%a:%v</name>
+                            <registry>docker.io/${docker.username}</registry>
+                            <build>
+                                <from>adoptopenjdk/openjdk8:alpine</from>
+
+                                <env>
+                                    <LOGBACK_CONFIG>-Dlogback.configurationFile=/opt/logging/logback.xml -Dakka.loggers.0=akka.event.slf4j.Slf4jLogger -Dakka.loglevel=DEBUG -Dakka.logging-filter=akka.event.slf4j.Slf4jLoggingFilter</LOGBACK_CONFIG>
+                                </env>
+
+                                <runCmds>
+                                    <run>apk add bash curl</run>
+                                    <run>mkdir -p /home/cloudflow /opt /prometheus</run>
+                                    <run>addgroup -g 185 -S cloudflow</run>
+                                    <run>adduser -u 185 -S -h /home/cloudflow -s /sbin/nologin cloudflow cloudflow</run>
+                                    <run>curl https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.11.0/jmx_prometheus_javaagent-0.11.0.jar -o /prometheus/jmx_prometheus_javaagent.jar</run>
+                                    <run>chmod a+x /opt/akka-entrypoint.sh</run>
+                                </runCmds>
+
+                                <assemblies>
+                                    <assembly>
+                                        <name>deps-release</name>
+                                        <descriptorRef>release-dependencies</descriptorRef>
+                                        <targetDir>/opt/cloudflow</targetDir>
+                                        <user>185</user>
+                                    </assembly>
+
+                                    <assembly>
+                                        <descriptorRef>artifact</descriptorRef>
+                                        <targetDir>/opt/cloudflow</targetDir>
+                                        <inline>
+                                            <files>
+                                                <file>
+                                                    <source>${basedir}/target/dependency/cinnamon-agent-${cinnamon.version}.jar</source>
+                                                </file>
+                                            </files>
+                                        </inline>
+                                        <user>185</user>
+                                    </assembly>
+
+                                    <assembly>
+                                        <name>additional-resources</name>
+                                        <mode>dir</mode>
+                                        <targetDir>/opt</targetDir>
+                                        <user>185</user>
+                                        <inline>
+                                            <files>
+                                                <file>
+                                                    <source>${basedir}/src/main/resources/akka-entrypoint.sh</source>
+                                                </file>
+                                            </files>
+                                        </inline>
+                                    </assembly>
+
+                                    <assembly>
+                                        <name>prometheus-resources</name>
+                                        <mode>dir</mode>
+                                        <targetDir>/etc/metrics/conf</targetDir>
+                                        <user>185</user>
+                                        <inline>
+                                            <files>
+                                                <file>
+                                                    <source>${basedir}/src/main/resources/prometheus.yaml</source>
+                                                </file>
+                                            </files>
+                                        </inline>
+                                    </assembly>
+
+                                </assemblies>
+
+                                <user>185</user>
+
+                                <entryPoint>
+                                    <exec>
+                                        <arg>bash</arg>
+                                        <arg>/opt/akka-entrypoint.sh</arg>
+                                    </exec>
+                                </entryPoint>
+                            </build>
+                        </image>
+                    </images>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.lightbend.cloudflow</groupId>
-            <artifactId>cloudflow-akka_${scala.bin.version}</artifactId>
-            <version>${cloudflow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lightbend.cloudflow</groupId>
-            <artifactId>cloudflow-akka-util_${scala.bin.version}</artifactId>
-            <version>${cloudflow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lightbend.cloudflow</groupId>
-            <artifactId>cloudflow-runner_${scala.bin.version}</artifactId>
-            <version>${cloudflow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lightbend.cloudflow</groupId>
-            <artifactId>cloudflow-localrunner_${scala.bin.version}</artifactId>
-            <version>${cloudflow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.16</version>
-        </dependency>
-        <!-- Add Lightbend Telemetry (Cinnamon) dependencies -->
-        <dependency>
-            <groupId>com.lightbend.cinnamon</groupId>
-            <artifactId>cinnamon-akka_${scala.bin.version}</artifactId>
-            <version>${cinnamon.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lightbend.cinnamon</groupId>
-            <artifactId>cinnamon-akka-stream_${scala.bin.version}</artifactId>
-            <version>${cinnamon.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lightbend.cinnamon</groupId>
-            <artifactId>cinnamon-akka-http_${scala.bin.version}</artifactId>
-            <version>${cinnamon.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lightbend.cinnamon</groupId>
-            <artifactId>cinnamon-prometheus</artifactId>
-            <version>${cinnamon.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lightbend.cinnamon</groupId>
-            <artifactId>cinnamon-prometheus-httpserver</artifactId>
-            <version>${cinnamon.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-    </dependencies>
-
     <repositories>
         <repository>
             <id>lightbend-commercial</id>
             <name>Lightbend Commercial</name>
+            <!--
+                Lightbend Subscription required: You can get your LIGHTBEND_COMMERCIAL_URL from here -> https://www.lightbend.com/account/lightbend-platform/credentials
+
+                export LIGHTBEND_COMMERCIAL_URL="https://repo.lightbend.com/pass/<your-password>/commercial-releases"
+                mvn clean package cloudflow:extract-streamlets
+            -->
             <url>${env.LIGHTBEND_COMMERCIAL_URL}</url>
         </repository>
     </repositories>
