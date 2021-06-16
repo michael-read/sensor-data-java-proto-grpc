@@ -101,6 +101,9 @@
                     <groupId>com.lightbend.cloudflow</groupId>
                     <artifactId>cloudflow-maven-plugin</artifactId>
                     <version>${cloudflow.plugin.version}</version>
+                    <configuration>
+                        <localConfig>${basedir}/src/main/resources/local.conf</localConfig>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>io.fabric8</groupId>
