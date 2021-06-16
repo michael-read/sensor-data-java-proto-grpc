@@ -14,8 +14,8 @@ import cloudflow.streamlets.RoundRobinPartitioner;
 import cloudflow.streamlets.StreamletShape;
 import cloudflow.streamlets.proto.javadsl.ProtoInlet;
 import cloudflow.streamlets.proto.javadsl.ProtoOutlet;
-
 import com.lightbend.cinnamon.akka.stream.CinnamonAttributes;
+
 import sensordata.MetricProto.Metric;
 import sensordata.InvalidProto.InvalidMetric;
 
@@ -26,8 +26,10 @@ public class MetricsValidation extends AkkaStreamlet {
             "in",
             Metric.class,
             true,
-            (inBytes, throwable) -> null
-    );
+            (inBytes, throwable) -> {
+                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                return null; // skip the element
+            });
 
     public final ProtoOutlet<InvalidMetric> invalid =
             new ProtoOutlet<>("invalid",
@@ -58,18 +60,25 @@ public class MetricsValidation extends AkkaStreamlet {
                 return FlowWithContext.<Metric, Committable>create()
                         .map(metric -> {
                             if (metric.getValue() < 0) {
-//                                system().log().warning(String.format("%s %s = %f All metrics must be positive numbers", metric.getDeviceId(), metric.getName(), metric.getValue()));
-                                return Either.left(InvalidMetric.newBuilder()
+                                system().log().debug(String.format("%s %s = %f All metrics must be positive numbers", metric.getDeviceId(), metric.getName(), metric.getValue()));
+                                Either<InvalidMetric, Metric> invalidMetric = Either.left(InvalidMetric.newBuilder()
                                         .setMetric(metric)
                                         .setError("All metrics must be positive numbers!")
                                         .build()
                                 );
+                                return invalidMetric;
                             }
                             else {
-                                return Either.right(metric);
+                                Either<InvalidMetric, Metric> validMetric = Either.right(metric);
+                                return validMetric;
                             }
-                        });
-//                        .withAttributes(CinnamonAttributes.instrumented("MetricsValidation"));
+                        })
+                        /*
+                        Note: if you don't currently have a Lightbend subscription you can optionally comment
+                        out the following line referencing CinnamonAttributes and associated import above.
+                         */
+                        .withAttributes(CinnamonAttributes.instrumentedByName("MetricsValidation"));
+
             }
 
             public RunnableGraph createRunnableGraph() {

@@ -13,6 +13,7 @@ import cloudflow.streamlets.RegExpConfigParameter;
 import cloudflow.streamlets.StreamletShape;
 import cloudflow.streamlets.StringConfigParameter;
 import cloudflow.streamlets.proto.javadsl.ProtoInlet;
+import com.lightbend.cinnamon.akka.stream.CinnamonAttributes;
 
 import scala.Option;
 import scala.collection.immutable.IndexedSeq;
@@ -26,8 +27,10 @@ public class ValidMetricLogger extends AkkaStreamlet {
             "in",
             Metric.class,
             true,
-            (inBytes, throwable) -> null
-    );
+            (inBytes, throwable) -> {
+                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                return null; // skip the element
+            });
 
     private final RegExpConfigParameter logLevel = new RegExpConfigParameter(
             "log-level",
@@ -86,7 +89,12 @@ public class ValidMetricLogger extends AkkaStreamlet {
                         .map(validMetric -> {
                             log(validMetric);
                             return validMetric;
-                        });
+                        })
+                        /*
+                        Note: if you don't currently have a Lightbend subscription you can optionally comment
+                        out the following line referencing CinnamonAttributes and associated import above.
+                         */
+                        .withAttributes(CinnamonAttributes.instrumentedByName("ValidMetricLogger"));
             }
 
             @Override

@@ -13,19 +13,29 @@ public class SensorDataIngressImpl implements SensorDataService {
         this.sinkRef = sinkRef;
     }
 
-    @Override
-    public CompletionStage<SensorDataReply> provide(SensorData in) {
+    private CompletionStage<SensorDataReply> provideMethod(SensorData in) {
         return sinkRef.writeJava(in)
-                .thenApply(i -> SensorDataReply.newBuilder()
+                .thenApply(result -> SensorDataReply.newBuilder()
                         .setDeviceId(in.getDeviceId())
                         .setSuccess(true)
+                        .build())
+                .exceptionally(e -> SensorDataReply.newBuilder()
+                        .setDeviceId(in.getDeviceId())
+                        .setSuccess(false)
+                        .setFailureMsg(e.getMessage())
                         .build());
-        // TODO: Look into recovery or failure
+    }
+
+    @Override
+    public CompletionStage<SensorDataReply> provide(SensorData in) {
+        return provideMethod(in);
     }
 
     @Override
     public Source<SensorDataReply, NotUsed> provideStreamed(Source<SensorData, NotUsed> in) {
-        // TODO: build streaming implementation
-        return null;
+        return in.mapAsync(5, (sensorData) -> {
+            return provideMethod(sensorData);
+        });
+
     }
 }

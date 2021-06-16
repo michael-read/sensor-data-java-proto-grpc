@@ -10,6 +10,7 @@ import cloudflow.akkastream.AkkaStreamletLogic;
 import cloudflow.akkastream.javadsl.RunnableGraphStreamletLogic;
 import cloudflow.streamlets.StreamletShape;
 import cloudflow.streamlets.proto.javadsl.ProtoInlet;
+import com.lightbend.cinnamon.akka.stream.CinnamonAttributes;
 
 import sensordata.InvalidProto.InvalidMetric;
 
@@ -19,8 +20,10 @@ public class InvalidMetricLogger extends AkkaStreamlet {
             "in",
             InvalidMetric.class,
             true,
-            (inBytes, throwable) -> null
-    );
+            (inBytes, throwable) -> {
+                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex) %h", throwable.getMessage(), inBytes));
+                return null; // skip the element
+            });
 
     @Override
     public StreamletShape shape() {
@@ -36,7 +39,12 @@ public class InvalidMetricLogger extends AkkaStreamlet {
                         .map(invalidMetric -> {
                             system().log().warning(String.format("%s = %s", "Invalid metric detected!!!", invalidMetric.toString()));
                             return invalidMetric;
-                        });
+                        })
+                        /*
+                        Note: if you don't currently have a Lightbend subscription you can optionally comment
+                        out the following line referencing CinnamonAttributes and associated import above.
+                         */
+                        .withAttributes(CinnamonAttributes.instrumentedByName("InvalidMetricLogger"));
             }
 
             @Override
