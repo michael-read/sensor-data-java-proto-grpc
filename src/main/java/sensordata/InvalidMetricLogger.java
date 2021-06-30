@@ -12,18 +12,17 @@ import cloudflow.streamlets.StreamletShape;
 import cloudflow.streamlets.proto.javadsl.ProtoInlet;
 import com.lightbend.cinnamon.akka.stream.CinnamonAttributes;
 
+import scala.Option;
 import sensordata.InvalidProto.InvalidMetric;
 
 public class InvalidMetricLogger extends AkkaStreamlet {
 
-    private final ProtoInlet<InvalidMetric> inlet = new ProtoInlet<>(
-            "in",
-            InvalidMetric.class,
-            true,
-            (inBytes, throwable) -> {
-                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex) %h", throwable.getMessage(), inBytes));
-                return null; // skip the element
-            });
+    private final ProtoInlet<InvalidMetric> inlet = (ProtoInlet<InvalidMetric>) ProtoInlet.create("in", InvalidMetric.class)
+            .withErrorHandler((inBytes, throwable) -> {
+                        context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                        return Option.apply(null); // skip the element
+                    }
+            );
 
     @Override
     public StreamletShape shape() {

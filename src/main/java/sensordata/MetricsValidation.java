@@ -16,12 +16,21 @@ import cloudflow.streamlets.proto.javadsl.ProtoInlet;
 import cloudflow.streamlets.proto.javadsl.ProtoOutlet;
 import com.lightbend.cinnamon.akka.stream.CinnamonAttributes;
 
+import scala.Option;
 import sensordata.MetricProto.Metric;
 import sensordata.InvalidProto.InvalidMetric;
 
 import java.util.UUID;
 
 public class MetricsValidation extends AkkaStreamlet {
+    private final ProtoInlet<Metric> inlet = (ProtoInlet<Metric>) ProtoInlet.create("in", Metric.class)
+            .withErrorHandler((inBytes, throwable) -> {
+                        context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                        return Option.apply(null); // skip the element
+                    }
+            );
+
+/*
     private final ProtoInlet<Metric> inlet = new ProtoInlet<Metric>(
             "in",
             Metric.class,
@@ -30,6 +39,7 @@ public class MetricsValidation extends AkkaStreamlet {
                 context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
                 return null; // skip the element
             });
+*/
 
     public final ProtoOutlet<InvalidMetric> invalid =
             new ProtoOutlet<>("invalid",
@@ -60,7 +70,9 @@ public class MetricsValidation extends AkkaStreamlet {
                 return FlowWithContext.<Metric, Committable>create()
                         .map(metric -> {
                             if (metric.getValue() < 0) {
-                                system().log().debug(String.format("%s %s = %f All metrics must be positive numbers", metric.getDeviceId(), metric.getName(), metric.getValue()));
+                                if (system().log().isDebugEnabled()) {
+                                    system().log().debug(String.format("%s %s = %f All metrics must be positive numbers", metric.getDeviceId(), metric.getName(), metric.getValue()));
+                                }
                                 Either<InvalidMetric, Metric> invalidMetric = Either.left(InvalidMetric.newBuilder()
                                         .setMetric(metric)
                                         .setError("All metrics must be positive numbers!")

@@ -23,14 +23,21 @@ import sensordata.MetricProto.Metric;
 
 public class ValidMetricLogger extends AkkaStreamlet {
 
-    private final ProtoInlet<Metric> inlet = new ProtoInlet<>(
+    private final ProtoInlet<Metric> inlet = (ProtoInlet<Metric>) ProtoInlet.create("in", Metric.class)
+            .withErrorHandler((inBytes, throwable) -> {
+                        context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                        return Option.apply(null); // skip the element
+                    }
+            );
+
+/*    private final ProtoInlet<Metric> inlet = new ProtoInlet<>(
             "in",
             Metric.class,
             true,
             (inBytes, throwable) -> {
                 context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
                 return null; // skip the element
-            });
+            });*/
 
     private final RegExpConfigParameter logLevel = new RegExpConfigParameter(
             "log-level",

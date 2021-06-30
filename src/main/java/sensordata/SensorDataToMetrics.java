@@ -8,19 +8,31 @@ import akka.stream.javadsl.RunnableGraph;
 import cloudflow.akkastream.AkkaStreamlet;
 import cloudflow.akkastream.AkkaStreamletLogic;
 import cloudflow.akkastream.javadsl.RunnableGraphStreamletLogic;
+import cloudflow.streamlets.CodecInlet;
 import cloudflow.streamlets.RoundRobinPartitioner;
 import cloudflow.streamlets.StreamletShape;
 import cloudflow.streamlets.proto.javadsl.ProtoInlet;
 import cloudflow.streamlets.proto.javadsl.ProtoOutlet;
 import com.lightbend.cinnamon.akka.stream.CinnamonAttributes;
 
+
+import scala.Option;
 import sensordata.MetricProto.Metric;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class SensorDataToMetrics extends AkkaStreamlet {
-    private final ProtoInlet<SensorData> inlet = new ProtoInlet<SensorData>(
+    private final ProtoInlet<SensorData> inlet = (ProtoInlet<SensorData>) ProtoInlet.create("in", SensorData.class)
+            .withErrorHandler((inBytes, throwable) -> {
+                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                return Option.apply(null); // skip the element
+            }
+    );
+
+/*
+    private final ProtoInlet<SensorData> inlet2 = new ProtoInlet<SensorData>(
             "in",
             SensorData.class,
             true,
@@ -28,9 +40,10 @@ public class SensorDataToMetrics extends AkkaStreamlet {
                 context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
                 return null; // skip the element
             });
+*/
 
     public final ProtoOutlet<Metric> outlet =
-            new ProtoOutlet<>("out", RoundRobinPartitioner.getInstance(), Metric.class);
+            new ProtoOutlet<Metric>("out", RoundRobinPartitioner.getInstance(), Metric.class);
 
     @Override
     public StreamletShape shape() {
@@ -45,7 +58,7 @@ public class SensorDataToMetrics extends AkkaStreamlet {
                 return FlowWithContext.<SensorData, ConsumerMessage.Committable>create()
                     .mapConcat(data -> {
                             List<Metric> metrics = Arrays.asList(
-                                    Metric.newBuilder()
+                                   Metric.newBuilder()
                                             .setDeviceId(data.getDeviceId())
                                             .setTimestamp(data.getTimestamp())
                                             .setName("power")

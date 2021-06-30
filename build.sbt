@@ -52,6 +52,8 @@ lazy val sensorData =  (project in file("."))
     schemaCodeGenerator := SchemaCodeGenerator.Java,
 
     runLocalConfigFile := Some("src/main/resources/local.conf"),
+    runLocalLog4jConfigFile := Some("src/main/resources/log4j.xml"),
+
     name := "sensor-data-java-proto-grpc",
 
     // Add the Cinnamon Agent settings for run and test

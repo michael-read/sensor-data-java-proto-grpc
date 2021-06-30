@@ -103,6 +103,7 @@
                     <version>${cloudflow.plugin.version}</version>
                     <configuration>
                         <localConfig>${basedir}/src/main/resources/local.conf</localConfig>
+                        <log4jConfig>${basedir}/src/main/resources/log4j.xml</log4jConfig>
                     </configuration>
                 </plugin>
                 <plugin>

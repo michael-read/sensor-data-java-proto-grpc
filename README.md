@@ -1,9 +1,7 @@
 ![Akka Data Pipelines](adp.png)
-# Akka Data Pipelines - Streaming Data Pipelines Simplified - Introduction
+# Akka Data Pipelines (Java) - Streaming Data Pipelines Simplified - Introduction
 
-## Commercial Lightbend Credentials for pom.xml
-export LIGHTBEND_COMMERCIAL_URL="https://repo.lightbend.com/pass/<your-password>/commercial-releases"
-mvn clean package cloudflow:extract-streamlets
+Note: This is a Java version of the of the previously published Scala version of the guide described below. This is a work in progress, which also provides a Maven version for building and deploying the sample pipeline. 
 
 ## Streaming Data Is More Interesting Than Data At Rest
 
@@ -33,8 +31,9 @@ You can find the Akka Data Pipelines Tutorial [here](https://developer.lightbend
 
 ---
 # Update Notes
-
-
+July 30, 2021 
+- Releasing Java version to the public.
+- Maven can be used here instead of SBT. For more infomation on using Maven with Cloudflow please see [this](https://cloudflow.io/docs/current/develop/maven-support.html).
 ---
 # Other Notes:
 
