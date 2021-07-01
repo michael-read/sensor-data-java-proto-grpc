@@ -31,7 +31,9 @@ You can find the Akka Data Pipelines Tutorial [here](https://developer.lightbend
 
 ---
 # Update Notes
-July 30, 2021 
+July 1, 2021 
+- Upgrade Kafka to 2.8.0 with Strimzi
+June 30, 2021 
 - Releasing Java version to the public.
 - Maven can be used here instead of SBT. For more infomation on using Maven with Cloudflow please see [this](https://cloudflow.io/docs/current/develop/maven-support.html).
 ---
