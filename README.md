@@ -31,8 +31,11 @@ You can find the Akka Data Pipelines Tutorial [here](https://developer.lightbend
 
 ---
 # Update Notes
+### July 7, 2021
+- Add Java Akka gRPC Client - streaming request/response ("provideStreamed" API)
+
 ### July 6, 2021
-- Add Java Akka gRPC Client - request/response (provide API)
+- Add Java Akka gRPC Client - request/response ("provide" API)
 
 ### July 1, 2021 
 - Upgrade Kafka to 2.8.0 with Strimzi
