@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -22,22 +23,20 @@ class SensorDataClientForEach {
 
     public <T> CompletableFuture<List<T>> allOf(List<CompletableFuture<T>> futuresList) {
         CompletableFuture<Void> allFuturesResult =
-                CompletableFuture.allOf(futuresList.toArray(new CompletableFuture[futuresList.size()]));
+                CompletableFuture.allOf(futuresList.toArray(new CompletableFuture[0]));
         return allFuturesResult.thenApply(v ->
                 futuresList.stream().
-                        map(future -> future.join()).
+                        map(CompletableFuture::join).
                         collect(Collectors.<T>toList())
         );
     }
 
     CompletableFuture<SensorDataReply> singleRequestReply(SensorDataServiceClient client, SensorData data, int cnt) {
-        System.out.println(String.format("transmitting data for device Id (%d): %s", cnt, data.getDeviceId()));
+        System.out.printf("transmitting data for device Id (%d): %s%n", cnt, data.getDeviceId());
         CompletionStage<SensorDataReply> reply = client.provide(data);
-        reply.thenAccept(msg -> {
-            System.out.println(String.format("received response for device Id (%d): %s", cnt, msg.getDeviceId()));
-        })
+        reply.thenAccept(msg -> System.out.printf("received response for device Id (%d): %s%n", cnt, msg.getDeviceId()))
         .exceptionally(ex -> {
-            System.out.println(String.format("Something went wrong, Error (%d): %s", cnt, ex.getMessage()));
+            System.out.printf("Something went wrong, Error (%d): %s%n", cnt, ex.getMessage());
             return null;
         });
         return (CompletableFuture<SensorDataReply>) reply;
@@ -52,7 +51,7 @@ class SensorDataClientForEach {
         try {
             client = SensorDataServiceClient.create(settings, system);
 
-            List<String> filenames = (args.length == 0) ? Arrays.asList("../test-data/one-record-per-line.json") : Arrays.asList(args);
+            List<String> filenames = (args.length == 0) ? Collections.singletonList("../test-data/one-record-per-line.json") : Arrays.asList(args);
             int cnt = 0;
 
             for (String filename : filenames) {
@@ -69,7 +68,7 @@ class SensorDataClientForEach {
                 }
                 fr.close();    //closes the stream and release the resources
             }
-            System.out.println(String.format("requests sent %d", replies.size()));
+            System.out.printf("requests sent %d%n", replies.size());
 
         } catch (StatusRuntimeException e) {
             System.out.println("Status: " + e.getStatus());
@@ -83,7 +82,7 @@ class SensorDataClientForEach {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         new SensorDataClientForEach().doWork(args);
     }
 
