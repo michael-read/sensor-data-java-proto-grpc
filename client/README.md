@@ -1,6 +1,6 @@
 # Client Examples
 
-We’ve provided two examples for sending sensor data, read from a file, into the gRPC ingress:
+We’ve provided two examples for sending sensor data, that read from a file, into the gRPC ingress:
 
 
 - **SensorDataClientForEach** - illustrates a traditional request / response pattern for each *SensorData* sent to the ingress. For each request sent a *SensorDataReply* is returned as a response.
