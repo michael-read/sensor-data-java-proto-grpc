@@ -28,7 +28,7 @@ By leveraging [Akka Data Pipelines from Lightbend](https://www.lightbend.com/akk
 
 You can find the Akka Data Pipelines Tutorial [here](https://developer.lightbend.com/guides/akka-data-pipelines-iot-sensor-tutorial/).
 
-
+This is a repository for Java, you can find the Scala one [here](https://github.com/michael-read/sensor-data-scala-proto-grpc).
 ---
 # Update Notes
 ### July 7, 2021
