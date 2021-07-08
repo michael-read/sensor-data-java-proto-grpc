@@ -106,8 +106,8 @@ mvn clean package cloudflow:extract-streamlets cloudflow:verify-blueprint cloudf
 equivalent of `sbt:buildApp`
 
 ```
-mvn clean
 mvn \
+  clean \
   package \
   cloudflow:extract-streamlets \
   docker:build \
