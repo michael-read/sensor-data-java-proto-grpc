@@ -16,7 +16,7 @@
         <cloudflow.plugin.version>2.1.2</cloudflow.plugin.version>
         <docker.maven.plugin.version>0.36.0</docker.maven.plugin.version>
         <akka.version>2.6.13</akka.version>
-        <cinnamon.version>2.15.1</cinnamon.version>
+        <cinnamon.version>2.15.2</cinnamon.version>
     </properties>
 
     <dependencies>
