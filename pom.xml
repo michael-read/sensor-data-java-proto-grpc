@@ -19,6 +19,19 @@
         <cinnamon.version>2.15.2</cinnamon.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>lightbend-commercial</id>
+            <name>Lightbend Commercial</name>
+            <!--
+                Lightbend Subscription required: You can get your LIGHTBEND_COMMERCIAL_URL from here -> https://www.lightbend.com/account/lightbend-platform/credentials
+
+                export LIGHTBEND_COMMERCIAL_URL="https://repo.lightbend.com/pass/<your-password-token>/commercial-releases"
+            -->
+            <url>${env.LIGHTBEND_COMMERCIAL_URL}</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.lightbend.cloudflow</groupId>
@@ -267,19 +280,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>lightbend-commercial</id>
-            <name>Lightbend Commercial</name>
-            <!--
-                Lightbend Subscription required: You can get your LIGHTBEND_COMMERCIAL_URL from here -> https://www.lightbend.com/account/lightbend-platform/credentials
-
-                export LIGHTBEND_COMMERCIAL_URL="https://repo.lightbend.com/pass/<your-password>/commercial-releases"
-                mvn clean package cloudflow:extract-streamlets
-            -->
-            <url>${env.LIGHTBEND_COMMERCIAL_URL}</url>
-        </repository>
-    </repositories>
 
 </project>
