@@ -3,6 +3,7 @@ import sbt.{ThisBuild, _}
 import sbt.Keys.{watchSources, _}
 
 ThisBuild / version := "0.0.1"
+ThisBuild / evictionErrorLevel := Level.Info
 
 val credentialFile = new File("lightbend.sbt")
 

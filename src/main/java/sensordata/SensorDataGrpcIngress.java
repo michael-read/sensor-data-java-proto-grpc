@@ -3,7 +3,7 @@ package sensordata;
 import akka.grpc.javadsl.ServerReflection;
 import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.model.HttpResponse;
-import akka.japi.Function;
+import akka.japi.function.Function;
 
 import cloudflow.akkastream.AkkaServerStreamlet;
 import cloudflow.akkastream.AkkaStreamletLogic;
