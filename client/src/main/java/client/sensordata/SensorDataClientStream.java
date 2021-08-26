@@ -24,6 +24,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// tag::clientStream[]
 class SensorDataClientStream {
 
     void doWork(String[] args) {
@@ -89,3 +90,4 @@ class SensorDataClientStream {
     }
 
 }
+// end::clientStream[]

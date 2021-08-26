@@ -15,11 +15,14 @@ import com.lightbend.cinnamon.akka.stream.CinnamonAttributes;
 import scala.Option;
 import sensordata.InvalidProto.InvalidMetric;
 
+import java.util.Arrays;
+
+// tag::invalidMetric[]
 public class InvalidMetricLogger extends AkkaStreamlet {
 
     private final ProtoInlet<InvalidMetric> inlet = (ProtoInlet<InvalidMetric>) ProtoInlet.create("in", InvalidMetric.class)
             .withErrorHandler((inBytes, throwable) -> {
-                        context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                        context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), Arrays.toString(inBytes)));
                         return Option.apply(null); // skip the element
                     }
             );
@@ -56,3 +59,4 @@ public class InvalidMetricLogger extends AkkaStreamlet {
     }
 
 }
+// end::invalidMetric[]

@@ -21,6 +21,7 @@ import scala.collection.immutable.VectorBuilder;
 
 import sensordata.MetricProto.Metric;
 
+// tag::validMetric[]
 public class ValidMetricLogger extends AkkaStreamlet {
 
     private final ProtoInlet<Metric> inlet = (ProtoInlet<Metric>) ProtoInlet.create("in", Metric.class)
@@ -114,3 +115,4 @@ public class ValidMetricLogger extends AkkaStreamlet {
     }
 
 }
+// end::validMetric[]

@@ -6,6 +6,7 @@ import cloudflow.akkastream.WritableSinkRef;
 
 import java.util.concurrent.CompletionStage;
 
+// tag::ingressImpl[]
 public class SensorDataIngressImpl implements SensorDataService {
     private final WritableSinkRef<SensorData> sinkRef;
 
@@ -33,9 +34,8 @@ public class SensorDataIngressImpl implements SensorDataService {
 
     @Override
     public Source<SensorDataReply, NotUsed> provideStreamed(Source<SensorData, NotUsed> in) {
-        return in.mapAsync(5, (sensorData) -> {
-            return provideMethod(sensorData);
-        });
-
+        return in.mapAsync(5, this::provideMethod);
     }
+
 }
+// end::ingressImpl[]
