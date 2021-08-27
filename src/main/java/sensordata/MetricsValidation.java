@@ -20,26 +20,20 @@ import scala.Option;
 import sensordata.MetricProto.Metric;
 import sensordata.InvalidProto.InvalidMetric;
 
+import java.util.Arrays;
 import java.util.UUID;
 
+// tag::validation[]
 public class MetricsValidation extends AkkaStreamlet {
-    private final ProtoInlet<Metric> inlet = (ProtoInlet<Metric>) ProtoInlet.create("in", Metric.class)
-            .withErrorHandler((inBytes, throwable) -> {
-                        context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
-                        return Option.apply(null); // skip the element
-                    }
-            );
 
-/*
-    private final ProtoInlet<Metric> inlet = new ProtoInlet<Metric>(
+    private final ProtoInlet<Metric> inlet = new ProtoInlet<>(
             "in",
             Metric.class,
             true,
             (inBytes, throwable) -> {
-                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), Arrays.toString(inBytes)));
                 return null; // skip the element
             });
-*/
 
     public final ProtoOutlet<InvalidMetric> invalid =
             new ProtoOutlet<>("invalid",
@@ -73,16 +67,14 @@ public class MetricsValidation extends AkkaStreamlet {
                                 if (system().log().isDebugEnabled()) {
                                     system().log().debug(String.format("%s %s = %f All metrics must be positive numbers", metric.getDeviceId(), metric.getName(), metric.getValue()));
                                 }
-                                Either<InvalidMetric, Metric> invalidMetric = Either.left(InvalidMetric.newBuilder()
+                                return Either.<InvalidMetric, Metric>left(InvalidMetric.newBuilder()
                                         .setMetric(metric)
                                         .setError("All metrics must be positive numbers!")
                                         .build()
                                 );
-                                return invalidMetric;
                             }
                             else {
-                                Either<InvalidMetric, Metric> validMetric = Either.right(metric);
-                                return validMetric;
+                                return Either.<InvalidMetric, Metric>right(metric);
                             }
                         })
                         /*
@@ -100,3 +92,4 @@ public class MetricsValidation extends AkkaStreamlet {
     }
 
 }
+// end::validation[]

@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+// tag::clientForEach[]
 class SensorDataClientForEach {
 
     public <T> CompletableFuture<List<T>> allOf(List<CompletableFuture<T>> futuresList) {
@@ -87,3 +88,4 @@ class SensorDataClientForEach {
     }
 
 }
+// end::clientForEach[]

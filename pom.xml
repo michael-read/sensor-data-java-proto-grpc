@@ -12,10 +12,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <scala.version>2.12.12</scala.version>
         <scala.bin.version>2.12</scala.bin.version>
-        <cloudflow.version>2.1.2</cloudflow.version>
-        <cloudflow.plugin.version>2.1.2</cloudflow.plugin.version>
+        <cloudflow.version>2.2.2</cloudflow.version>
+        <cloudflow.plugin.version>2.2.2</cloudflow.plugin.version>
+        <akka.grpc.version>2.0.0</akka.grpc.version>
         <docker.maven.plugin.version>0.36.0</docker.maven.plugin.version>
-        <akka.version>2.6.13</akka.version>
         <cinnamon.version>2.15.2</cinnamon.version>
     </properties>
 
@@ -140,14 +140,7 @@
             <plugin>
                 <groupId>com.lightbend.akka.grpc</groupId>
                 <artifactId>akka-grpc-maven-plugin</artifactId>
-                <version>1.0.3</version>
-                <executions>
-                    <execution>
-                        <goals>
-                        <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <version>${akka.grpc.version}</version>
                 <configuration>
                     <language>Java</language>
                     <generateClient>false</generateClient>
@@ -156,6 +149,13 @@
                         <protoPath>src/main/protobuf</protoPath>
                     </protoPaths>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Add plugin to correctly copy Lightbend Telemetry (Cinnamon) agent -->
             <plugin>
