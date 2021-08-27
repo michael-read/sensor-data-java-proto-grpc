@@ -20,12 +20,14 @@ import java.util.Arrays;
 // tag::invalidMetric[]
 public class InvalidMetricLogger extends AkkaStreamlet {
 
-    private final ProtoInlet<InvalidMetric> inlet = (ProtoInlet<InvalidMetric>) ProtoInlet.create("in", InvalidMetric.class)
-            .withErrorHandler((inBytes, throwable) -> {
-                        context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), Arrays.toString(inBytes)));
-                        return Option.apply(null); // skip the element
-                    }
-            );
+    private final ProtoInlet<InvalidMetric> inlet = new ProtoInlet<>(
+            "in",
+            InvalidMetric.class,
+            true,
+            (inBytes, throwable) -> {
+                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), Arrays.toString(inBytes)));
+                return null; // skip the element
+            });
 
     @Override
     public StreamletShape shape() {

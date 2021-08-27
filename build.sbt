@@ -2,8 +2,8 @@
 import sbt.{ThisBuild, _}
 import sbt.Keys.{watchSources, _}
 
-ThisBuild / version := "0.0.1"
-ThisBuild / evictionErrorLevel := Level.Info
+ThisBuild / version := "0.0.2"
+//ThisBuild / evictionErrorLevel := Level.Info
 
 val credentialFile = new File("lightbend.sbt")
 
@@ -36,7 +36,7 @@ def commercialDependencies : Seq[ModuleID] = {
 def ossDependencies : Seq[ModuleID] = {
   Seq(
     "com.lightbend.akka"     %% "akka-stream-alpakka-file"  % "1.1.2",
-    "com.thesamet.scalapb"   %% "scalapb-json4s"            % "0.10.1",
+    "com.thesamet.scalapb"   %% "scalapb-json4s"            % "0.11.0",
     "ch.qos.logback"         %  "logback-classic"           % "1.2.3",
     "com.typesafe.akka"      %% "akka-http-testkit"         % "10.1.12" % "test",
     "org.scalatest"          %% "scalatest"                 % "3.0.8"  % "test"

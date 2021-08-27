@@ -19,23 +19,15 @@ import java.util.Arrays;
 
 // tag::toMetrics[]
 public class SensorDataToMetrics extends AkkaStreamlet {
-    private final ProtoInlet<SensorData> inlet = (ProtoInlet<SensorData>) ProtoInlet.create("in", SensorData.class)
-            .withErrorHandler((inBytes, throwable) -> {
-                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), Arrays.toString(inBytes)));
-                return Option.apply(null); // skip the element
-            }
-    );
 
-/*
-    private final ProtoInlet<SensorData> inlet2 = new ProtoInlet<SensorData>(
+    private final ProtoInlet<SensorData> inlet = new ProtoInlet<>(
             "in",
             SensorData.class,
             true,
             (inBytes, throwable) -> {
-                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), Arrays.toString(inBytes)));
                 return null; // skip the element
             });
-*/
 
     public final ProtoOutlet<Metric> outlet =
             new ProtoOutlet<>("out", RoundRobinPartitioner.getInstance(), Metric.class);

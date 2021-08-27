@@ -25,23 +25,15 @@ import java.util.UUID;
 
 // tag::validation[]
 public class MetricsValidation extends AkkaStreamlet {
-    private final ProtoInlet<Metric> inlet = (ProtoInlet<Metric>) ProtoInlet.create("in", Metric.class)
-            .withErrorHandler((inBytes, throwable) -> {
-                        context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), Arrays.toString(inBytes)));
-                        return Option.apply(null); // skip the element
-                    }
-            );
 
-/*
-    private final ProtoInlet<Metric> inlet = new ProtoInlet<Metric>(
+    private final ProtoInlet<Metric> inlet = new ProtoInlet<>(
             "in",
             Metric.class,
             true,
             (inBytes, throwable) -> {
-                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), inBytes));
+                context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), Arrays.toString(inBytes)));
                 return null; // skip the element
             });
-*/
 
     public final ProtoOutlet<InvalidMetric> invalid =
             new ProtoOutlet<>("invalid",
