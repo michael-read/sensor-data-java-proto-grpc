@@ -31,6 +31,9 @@ You can find the Akka Data Pipelines Tutorial [here](https://developer.lightbend
 This is a repository for Java, you can find the Scala one [here](https://github.com/michael-read/sensor-data-scala-proto-grpc).
 ---
 # Update Notes
+### Aug 30, 2021
+- Upgrade CF to 2.2.2, properly use the new inlet API
+
 ### July 7, 2021
 - Add Java Akka gRPC Client - streaming request/response ("provideStreamed" API)
 

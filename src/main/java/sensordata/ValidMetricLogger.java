@@ -22,17 +22,18 @@ import scala.collection.immutable.VectorBuilder;
 import sensordata.MetricProto.Metric;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 // tag::validMetric[]
 public class ValidMetricLogger extends AkkaStreamlet {
 
-    private final ProtoInlet<Metric> inlet = new ProtoInlet<>(
+    private final ProtoInlet<Metric> inlet = ProtoInlet.create(
             "in",
             Metric.class,
             true,
             (inBytes, throwable) -> {
                 context().system().log().error(String.format("an exception occurred on inlet: %s -> (hex string) %h", throwable.getMessage(), Arrays.toString(inBytes)));
-                return null; // skip the element
+                return Optional.empty(); // skip the element
             });
 
     private final RegExpConfigParameter logLevel = new RegExpConfigParameter(
